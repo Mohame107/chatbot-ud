@@ -639,7 +639,10 @@
       const res = await Promise.race([
         fetch(`${RASA_URL}/webhooks/rest/webhook`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'ngrok-skip-browser-warning': 'true'
+          },
           // Fix 1 — utilise sessionId fixe pour garder le contexte
           body: JSON.stringify({ sender: sessionId, message: text })
         }),
