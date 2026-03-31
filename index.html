@@ -405,7 +405,7 @@
 
 <footer>
   © 2025 Université de Djibouti — Campus Balbala &nbsp;|&nbsp;
-  <a href="mailto:ud@univ.edu.dj">ud@univ.edu.dj</a> &nbsp;|&nbsp;
+  <a href="/cdn-cgi/l/email-protection#c5b0a185b0abacb3eba0a1b0eba1af"><span class="__cf_email__" data-cfemail="daafbe9aafb4b3acf4bfbeaff4beb0">[email&#160;protected]</span></a> &nbsp;|&nbsp;
   (+253) 21 31 55 55
 </footer>
 
@@ -473,7 +473,7 @@
 <!-- ═══ FIN DU WIDGET ═══════════════════════════════════ -->
 
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
   // ══ CONFIG — change juste cette URL ══
   const RASA_URL = "https://conceptual-dennis-dashingly.ngrok-free.dev";
   // ══════════════════════════════════════
@@ -481,6 +481,8 @@
   let lang = 'fr';
   let chatOpen = false;
   let msgId = 0;
+  // Fix 1 — sessionId unique par conversation (Rasa garde le contexte)
+  let sessionId = 'ud-widget-' + Date.now();
   const now = () => new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
 
   // Ferme la tooltip au bout de 8s
@@ -547,11 +549,12 @@
 
   function getFallback(text) {
     const t = text.toLowerCase();
-    if (t.includes('inscri') || t.includes('comment') || t.includes('comment')) return replies.inscri;
-    if (t.includes('doc') || t.includes('pièce') || t.includes('dossier')) return replies.doc;
-    if (t.includes('frais') || t.includes('prix') || t.includes('payer') || t.includes('coût')) return replies.frais;
+    // ✅ Frais vérifié EN PREMIER avant inscription
+    if (t.includes('frais') || t.includes('prix') || t.includes('payer') || t.includes('coût') || t.includes('montant') || t.includes('combien')) return replies.frais;
+    if (t.includes('doc') || t.includes('pièce') || t.includes('dossier') || t.includes('papier')) return replies.doc;
     if (t.includes('fili') || t.includes('facult') || t.includes('formation') || t.includes('iut')) return replies.filiere;
-    if (t.includes('date') || t.includes('quand') || t.includes('juillet') || t.includes('délai')) return replies.date;
+    if (t.includes('date') || t.includes('quand') || t.includes('juillet') || t.includes('délai') || t.includes('calendrier')) return replies.date;
+    if (t.includes('inscri') || t.includes('comment') || t.includes('procéd') || t.includes('étape')) return replies.inscri;
     return replies.default;
   }
 
@@ -622,15 +625,6 @@
     addMsg('bot', welcomeMsgs[lang] || welcomeMsgs['fr'], ["Comment s'inscrire ?", "Filières disponibles ?", "Dates importantes ?"]);
   }
 
-  // ── LANGUE ────────────────────────────────────────────
-  function setLang(l, btn) {
-    lang = l;
-    document.querySelectorAll('.cw-lang').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById('cwMessages').innerHTML = '';
-    initChat();
-  }
-
   // ── ENVOI ─────────────────────────────────────────────
   async function sendMessage() {
     const input = document.getElementById('cwInput');
@@ -640,13 +634,14 @@
     addMsg('user', text);
     showTyping();
 
-    // Essaie ton serveur Rasa
+    // Essaie le serveur Rasa
     try {
       const res = await Promise.race([
         fetch(`${RASA_URL}/webhooks/rest/webhook`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sender: 'widget-' + Date.now(), message: text })
+          // Fix 1 — utilise sessionId fixe pour garder le contexte
+          body: JSON.stringify({ sender: sessionId, message: text })
         }),
         new Promise((_,r) => setTimeout(() => r(new Error('timeout')), 5000))
       ]);
@@ -655,11 +650,18 @@
       removeTyping();
 
       if (data && data.length > 0) {
-        data.forEach((msg, i) => {
-          setTimeout(() => {
-            addMsg('bot', msg.text || '...', i === data.length-1 ? getFallback(text).chips : null);
-          }, i * 300);
-        });
+        // Fix 2 — fusionner les bulles texte consécutives en une seule
+        const textMsgs = data.filter(m => m.text && (!m.buttons || m.buttons.length === 0));
+        const btnMsgs  = data.filter(m => m.text && m.buttons && m.buttons.length > 0);
+
+        // Afficher tous les textes fusionnés en une seule bulle
+        if (textMsgs.length > 0) {
+          const merged = textMsgs.map(m => m.text).join("\n\n");
+          addMsg('bot', merged, getFallback(text).chips);
+        }
+        // Afficher les messages avec boutons séparément
+        btnMsgs.forEach(m => addMsg('bot', m.text, null));
+
       } else {
         const { text: reply, chips } = getFallback(text);
         addMsg('bot', reply, chips);
@@ -669,6 +671,8 @@
       // Mode démo si Rasa indisponible
       await new Promise(r => setTimeout(r, 800 + Math.random()*500));
       removeTyping();
+      // Afficher un avertissement mode démo
+      addMsg('bot', '⚠️ *Mode démo* — Rasa non connecté. Réponse approximative :', null);
       const { text: reply, chips } = getFallback(text);
       addMsg('bot', reply, chips);
     }
@@ -677,6 +681,24 @@
   function sendQuick(text) {
     document.getElementById('cwInput').value = text;
     sendMessage();
+  }
+
+  function handleKey(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  }
+
+  // Réinitialise la session quand on change de langue
+  function setLang(l, btn) {
+    lang = l;
+    // Nouveau sessionId pour nouvelle session de langue
+    sessionId = 'ud-widget-' + Date.now();
+    document.querySelectorAll('.cw-lang').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('cwMessages').innerHTML = '';
+    initChat();
   }
 </script>
 
