@@ -179,7 +179,8 @@
       position: fixed;
       bottom: 104px; right: 28px;
       width: 370px;
-      height: 540px;
+      height: calc(100vh - 140px);
+      max-height: 540px;
       border-radius: 18px;
       background: white;
       box-shadow: 0 16px 60px rgba(0,0,0,0.22);
@@ -374,7 +375,7 @@
     }
 
     @media (max-width: 420px) {
-      #chat-window { width: calc(100vw - 20px); right: 10px; bottom: 90px; height: 65vh; }
+      #chat-window { width: calc(100vw - 20px); right: 10px; bottom: 90px; height: calc(100vh - 120px); max-height: 600px; }
       #chat-toggle { bottom: 18px; right: 18px; }
     }
   </style>
@@ -399,7 +400,7 @@
 <section class="hero">
   <div class="hero-badge">🎓 Inscriptions 2025 ouvertes</div>
   <h1>Bienvenue à l'<em>Université<br>de Djibouti</em></h1>
-  <p>Centralisez votre démarche d'inscription universitaire. Notre assistant virtuel vous guide 24h/24 en 5 langues.</p>
+  <p>Centralisez votre démarche d'inscription universitaire. Notre assistant virtuel vous guide 24h/24 en 3 langues.</p>
   <div class="hero-btns">
     <button class="btn-primary">Commencer l'inscription</button>
     <button class="btn-secondary">Découvrir les formations</button>
@@ -456,12 +457,14 @@
     <div class="cw-avatar">🤖</div>
     <div class="cw-info">
       <h4>Assistant UD — Inscriptions</h4>
-      <p><span class="cw-online"></span>En ligne · Répond en 5 langues</p>
+      <p><span class="cw-online"></span>En ligne · Répond en 3 langues</p>
     </div>
     <div class="cw-langs">
       <button class="cw-lang active" onclick="setLang('fr',this)">FR</button>
       <button class="cw-lang" onclick="setLang('ar',this)">AR</button>
+      <button class="cw-lang" onclick="setLang('so',this)">SO</button>
       <button class="cw-lang" onclick="setLang('en',this)">EN</button>
+      <button class="cw-lang" onclick="setLang('aa',this)">AA</button>
     </div>
   </div>
 
@@ -534,7 +537,9 @@
   const welcomeMsgs = {
     fr: "Bonjour ! 👋 Je suis l'**assistant virtuel** de l'Université de Djibouti.\n\nJe peux vous aider sur :\n- 📋 La procédure d'inscription\n- 📄 Les documents requis\n- 🏛 Les facultés et filières\n- 💰 Les frais d'inscription\n- 📅 Les dates importantes",
     ar: "مرحباً! 👋 أنا **المساعد الافتراضي** لجامعة جيبوتي.\n\nيمكنني مساعدتك في :\n- 📋 إجراءات التسجيل\n- 📄 الوثائق المطلوبة\n- 🏛 الكليات والتخصصات\n- 💰 رسوم التسجيل",
-    en: "Hello! 👋 I'm the **virtual assistant** of the University of Djibouti.\n\nI can help you with:\n- 📋 Enrollment procedure\n- 📄 Required documents\n- 🏛 Faculties and programs\n- 💰 Enrollment fees"
+    so: "Salaan! 👋 Waxaan ahay **kaaliyaha** Jaamacadda Jabuuti.\n\nWaxaan kaa caawin karaa:\n- 📋 Habka diiwaangelinta\n- 📄 Dukumiintiga loo baahan yahay\n- 🏛 Kulliyadaha iyo xirfadaha",
+    en: "Hello! 👋 I'm the **virtual assistant** of the University of Djibouti.\n\nI can help you with:\n- 📋 Enrollment procedure\n- 📄 Required documents\n- 🏛 Faculties and programs\n- 💰 Enrollment fees",
+    aa: "Inniya! 👋 Aniyye **kaaliyehe** Jaamacadda Jabuuti.\n\nAgartoo caawinee:\n- 📋 Habka diiwaangelinta\n- 📄 Dukumiintiga\n- 🏛 Kulliyadaha"
   };
 
   // ── RÉPONSES FALLBACK ──────────────────────────────────
@@ -716,7 +721,8 @@
   let isRecording = false;
 
   const LANG_SPEECH = {
-    'fr': 'fr-FR', 'ar': 'ar-SA', 'en': 'en-US'
+    'fr': 'fr-FR', 'ar': 'ar-SA', 'so': 'so-SO',
+    'en': 'en-US', 'aa': 'fr-FR'
   };
 
   function toggleVoice() {
