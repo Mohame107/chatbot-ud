@@ -461,9 +461,7 @@
     <div class="cw-langs">
       <button class="cw-lang active" onclick="setLang('fr',this)">FR</button>
       <button class="cw-lang" onclick="setLang('ar',this)">AR</button>
-      <button class="cw-lang" onclick="setLang('so',this)">SO</button>
       <button class="cw-lang" onclick="setLang('en',this)">EN</button>
-      <button class="cw-lang" onclick="setLang('aa',this)">AA</button>
     </div>
   </div>
 
@@ -536,9 +534,7 @@
   const welcomeMsgs = {
     fr: "Bonjour ! 👋 Je suis l'**assistant virtuel** de l'Université de Djibouti.\n\nJe peux vous aider sur :\n- 📋 La procédure d'inscription\n- 📄 Les documents requis\n- 🏛 Les facultés et filières\n- 💰 Les frais d'inscription\n- 📅 Les dates importantes",
     ar: "مرحباً! 👋 أنا **المساعد الافتراضي** لجامعة جيبوتي.\n\nيمكنني مساعدتك في :\n- 📋 إجراءات التسجيل\n- 📄 الوثائق المطلوبة\n- 🏛 الكليات والتخصصات\n- 💰 رسوم التسجيل",
-    so: "Salaan! 👋 Waxaan ahay **kaaliyaha** Jaamacadda Jabuuti.\n\nWaxaan kaa caawin karaa:\n- 📋 Habka diiwaangelinta\n- 📄 Dukumiintiga loo baahan yahay\n- 🏛 Kulliyadaha iyo xirfadaha",
-    en: "Hello! 👋 I'm the **virtual assistant** of the University of Djibouti.\n\nI can help you with:\n- 📋 Enrollment procedure\n- 📄 Required documents\n- 🏛 Faculties and programs\n- 💰 Enrollment fees",
-    aa: "Inniya! 👋 Aniyye **kaaliyehe** Jaamacadda Jabuuti.\n\nAgartoo caawinee:\n- 📋 Habka diiwaangelinta\n- 📄 Dukumiintiga\n- 🏛 Kulliyadaha"
+    en: "Hello! 👋 I'm the **virtual assistant** of the University of Djibouti.\n\nI can help you with:\n- 📋 Enrollment procedure\n- 📄 Required documents\n- 🏛 Faculties and programs\n- 💰 Enrollment fees"
   };
 
   // ── RÉPONSES FALLBACK ──────────────────────────────────
@@ -720,8 +716,7 @@
   let isRecording = false;
 
   const LANG_SPEECH = {
-    'fr': 'fr-FR', 'ar': 'ar-SA', 'so': 'so-SO',
-    'en': 'en-US', 'aa': 'fr-FR'
+    'fr': 'fr-FR', 'ar': 'ar-SA', 'en': 'en-US'
   };
 
   function toggleVoice() {
