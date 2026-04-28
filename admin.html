@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Assistant UD</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --surface2: #1a2234;
+    --border: #1e2d45;
+    --gold: #f0b429;
+    --gold2: #ffd166;
+    --blue: #1a56db;
+    --blue2: #3b82f6;
+    --green: #10b981;
+    --red: #ef4444;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --ar: #a78bfa;
+    --en: #34d399;
+    --fr: #60a5fa;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Background grid */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(240,180,41,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(240,180,41,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 32px 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Header */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 40px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .logo {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, #1a3a6b, #0d2147);
+    border: 2px solid var(--gold);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 16px;
+    color: var(--gold);
+  }
+
+  .header-title h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 22px;
+    color: var(--text);
+    letter-spacing: -0.5px;
+  }
+
+  .header-title p {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+  }
+
+  .status-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(16,185,129,0.1);
+    border: 1px solid rgba(16,185,129,0.3);
+    padding: 8px 16px;
+    border-radius: 100px;
+    font-size: 12px;
+    color: var(--green);
+  }
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--green);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  .refresh-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .refresh-btn:hover {
+    border-color: var(--gold);
+    color: var(--gold);
+  }
+
+  /* Loading */
+  .loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    gap: 16px;
+  }
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--border);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Stats grid */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  @media (max-width: 900px) {
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s, border-color 0.2s;
+    animation: fadeUp 0.5s ease both;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--gold);
+  }
+
+  .stat-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--gold), transparent);
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .stat-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  .stat-value {
+    font-family: 'Syne', sans-serif;
+    font-size: 40px;
+    font-weight: 800;
+    color: var(--gold);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .stat-sub {
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  /* Main grid */
+  .main-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  @media (max-width: 768px) {
+    .main-grid { grid-template-columns: 1fr; }
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    animation: fadeUp 0.5s ease both;
+  }
+
+  .card-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--text);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  /* Langue bars */
+  .lang-item {
+    margin-bottom: 16px;
+  }
+
+  .lang-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    font-size: 12px;
+  }
+
+  .lang-name { color: var(--text); font-weight: 500; }
+  .lang-count { color: var(--muted); }
+
+  .lang-bar {
+    height: 8px;
+    background: var(--surface2);
+    border-radius: 100px;
+    overflow: hidden;
+  }
+
+  .lang-fill {
+    height: 100%;
+    border-radius: 100px;
+    transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 0%;
+  }
+
+  .lang-fr .lang-fill { background: linear-gradient(90deg, var(--fr), #93c5fd); }
+  .lang-ar .lang-fill { background: linear-gradient(90deg, var(--ar), #c4b5fd); }
+  .lang-en .lang-fill { background: linear-gradient(90deg, var(--en), #6ee7b7); }
+
+  /* Feedback */
+  .feedback-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .feedback-box {
+    flex: 1;
+    background: var(--surface2);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    border: 1px solid var(--border);
+  }
+
+  .feedback-icon { font-size: 28px; margin-bottom: 8px; }
+
+  .feedback-val {
+    font-family: 'Syne', sans-serif;
+    font-size: 32px;
+    font-weight: 800;
+  }
+
+  .feedback-box.pos .feedback-val { color: var(--green); }
+  .feedback-box.neg .feedback-val { color: var(--red); }
+  .feedback-label { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+  /* Top questions */
+  .question-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .question-item:last-child { border-bottom: none; }
+
+  .question-rank {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 18px;
+    color: var(--gold);
+    min-width: 28px;
+    line-height: 1.3;
+  }
+
+  .question-text {
+    flex: 1;
+    font-size: 12px;
+    color: var(--text);
+    line-height: 1.5;
+  }
+
+  .question-count {
+    background: rgba(240,180,41,0.1);
+    border: 1px solid rgba(240,180,41,0.2);
+    color: var(--gold);
+    font-size: 11px;
+    padding: 2px 10px;
+    border-radius: 100px;
+    white-space: nowrap;
+  }
+
+  /* Activity chart */
+  .chart-wrap {
+    grid-column: 1 / -1;
+  }
+
+  .activity-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+    height: 100px;
+    padding: 8px 0;
+  }
+
+  .bar-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    height: 100%;
+    justify-content: flex-end;
+  }
+
+  .bar {
+    width: 100%;
+    background: linear-gradient(180deg, var(--gold), rgba(240,180,41,0.3));
+    border-radius: 4px 4px 0 0;
+    min-height: 4px;
+    transition: height 1s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+  }
+
+  .bar:hover { background: linear-gradient(180deg, var(--gold2), var(--gold)); }
+
+  .bar-label {
+    font-size: 9px;
+    color: var(--muted);
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  /* Recent log */
+  .log-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+  }
+
+  .log-table th {
+    text-align: left;
+    padding: 8px 12px;
+    color: var(--muted);
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .log-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(30,45,69,0.5);
+    vertical-align: middle;
+  }
+
+  .log-table tr:last-child td { border-bottom: none; }
+
+  .lang-badge {
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 500;
+  }
+
+  .badge-fr { background: rgba(96,165,250,0.15); color: var(--fr); }
+  .badge-ar { background: rgba(167,139,250,0.15); color: var(--ar); }
+  .badge-en { background: rgba(52,211,153,0.15); color: var(--en); }
+
+  .intent-tag {
+    background: var(--surface2);
+    color: var(--muted);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+  }
+
+  .full-width { grid-column: 1 / -1; }
+
+  .error-msg {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--muted);
+  }
+
+  .error-msg h3 {
+    font-family: 'Syne', sans-serif;
+    color: var(--red);
+    margin-bottom: 8px;
+  }
+
+  .last-update {
+    font-size: 11px;
+    color: var(--muted);
+    text-align: right;
+    margin-top: 16px;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-left">
+      <div class="logo">UD</div>
+      <div class="header-title">
+        <h1>Dashboard Admin</h1>
+        <p>Assistant Virtuel — Université de Djibouti</p>
+      </div>
+    </div>
+    <div style="display:flex;gap:12px;align-items:center;">
+      <div class="status-pill">
+        <div class="status-dot"></div>
+        HF Spaces actif
+      </div>
+      <button class="refresh-btn" onclick="loadStats()">
+        ↻ Rafraîchir
+      </button>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div id="content">
+    <div class="loading">
+      <div class="spinner"></div>
+      <p style="color:var(--muted);font-size:12px;">Chargement des statistiques...</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const HF_URL = "https://yazid16-chatbot-inscription-ud.hf.space/webhooks/rest/webhook";
+
+async function loadStats() {
+  document.getElementById('content').innerHTML = `
+    <div class="loading">
+      <div class="spinner"></div>
+      <p style="color:var(--muted);font-size:12px;">Chargement des statistiques...</p>
+    </div>`;
+
+  try {
+    const res = await fetch(HF_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sender: "admin_panel_" + Date.now(), message: "ADMIN_GET_STATS" })
+    });
+
+    const data = await res.json();
+    let statsRaw = null;
+
+    for (const msg of data) {
+      if (msg.text && msg.text.startsWith('STATS_JSON:')) {
+        try {
+          statsRaw = JSON.parse(msg.text.replace('STATS_JSON:', ''));
+        } catch(e) {}
+        break;
+      }
+    }
+
+    if (!statsRaw) throw new Error("Pas de données");
+    renderDashboard(statsRaw);
+
+  } catch(e) {
+    document.getElementById('content').innerHTML = `
+      <div class="card">
+        <div class="error-msg">
+          <h3>⚠️ Impossible de charger les données</h3>
+          <p>Vérifiez que HF Spaces est en ligne et que l'action admin est déployée.</p>
+          <p style="margin-top:8px;font-size:10px;color:#ef4444;">${e.message}</p>
+          <button class="refresh-btn" onclick="loadStats()" style="margin:16px auto 0;display:flex;">↻ Réessayer</button>
+        </div>
+      </div>`;
+  }
+}
+
+function renderDashboard(s) {
+  const totalFeedback = (s.feedback_pos || 0) + (s.feedback_neg || 0);
+  const satisfactionRate = totalFeedback > 0
+    ? Math.round((s.feedback_pos / totalFeedback) * 100)
+    : 0;
+
+  // Activity chart (7 derniers jours)
+  const days = s.activity_7days || [];
+  const maxVal = Math.max(...days.map(d => d.count), 1);
+
+  const barsHTML = days.map(d => {
+    const h = Math.max(4, Math.round((d.count / maxVal) * 88));
+    return `<div class="bar-wrap">
+      <div class="bar" style="height:${h}px" title="${d.count} messages"></div>
+      <div class="bar-label">${d.label}</div>
+    </div>`;
+  }).join('');
+
+  // Top questions
+  const topQ = (s.top_questions || []).slice(0, 6);
+  const topQHTML = topQ.length > 0
+    ? topQ.map((q, i) => `
+      <div class="question-item">
+        <div class="question-rank">${i+1}</div>
+        <div class="question-text">${q.text}</div>
+        <div class="question-count">${q.count}×</div>
+      </div>`).join('')
+    : '<p style="color:var(--muted);font-size:12px;text-align:center;padding:20px">Aucune question enregistrée</p>';
+
+  // Recent logs
+  const recent = (s.recent || []).slice(0, 8);
+  const recentHTML = recent.length > 0
+    ? recent.map(r => `
+      <tr>
+        <td style="color:var(--muted)">${r.date}</td>
+        <td><span class="lang-badge badge-${r.lang}">${r.lang.toUpperCase()}</span></td>
+        <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.question}</td>
+        <td><span class="intent-tag">${r.intent || '—'}</span></td>
+      </tr>`).join('')
+    : '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:20px">Aucun historique</td></tr>';
+
+  // Langue percentages
+  const totalLang = (s.lang_fr || 0) + (s.lang_ar || 0) + (s.lang_en || 0) || 1;
+  const pctFR = Math.round((s.lang_fr || 0) / totalLang * 100);
+  const pctAR = Math.round((s.lang_ar || 0) / totalLang * 100);
+  const pctEN = Math.round((s.lang_en || 0) / totalLang * 100);
+
+  document.getElementById('content').innerHTML = `
+    <!-- Stats KPI -->
+    <div class="stats-grid">
+      <div class="stat-card" style="animation-delay:0s">
+        <div class="stat-label">Total conversations</div>
+        <div class="stat-value">${s.total || 0}</div>
+        <div class="stat-sub">messages traités</div>
+      </div>
+      <div class="stat-card" style="animation-delay:0.1s">
+        <div class="stat-label">Aujourd'hui</div>
+        <div class="stat-value">${s.today || 0}</div>
+        <div class="stat-sub">messages aujourd'hui</div>
+      </div>
+      <div class="stat-card" style="animation-delay:0.2s">
+        <div class="stat-label">Satisfaction</div>
+        <div class="stat-value" style="color:${satisfactionRate >= 70 ? 'var(--green)' : 'var(--red)'}">${satisfactionRate}%</div>
+        <div class="stat-sub">${totalFeedback} feedbacks reçus</div>
+      </div>
+      <div class="stat-card" style="animation-delay:0.3s">
+        <div class="stat-label">Cette semaine</div>
+        <div class="stat-value">${s.this_week || 0}</div>
+        <div class="stat-sub">messages cette semaine</div>
+      </div>
+    </div>
+
+    <!-- Main grid -->
+    <div class="main-grid">
+
+      <!-- Langues -->
+      <div class="card" style="animation-delay:0.4s">
+        <div class="card-title">🌍 Répartition des langues</div>
+        <div class="lang-item lang-fr">
+          <div class="lang-header">
+            <span class="lang-name">🇫🇷 Français</span>
+            <span class="lang-count">${s.lang_fr || 0} msg · ${pctFR}%</span>
+          </div>
+          <div class="lang-bar"><div class="lang-fill" data-width="${pctFR}"></div></div>
+        </div>
+        <div class="lang-item lang-ar">
+          <div class="lang-header">
+            <span class="lang-name">🇸🇦 Arabe</span>
+            <span class="lang-count">${s.lang_ar || 0} msg · ${pctAR}%</span>
+          </div>
+          <div class="lang-bar"><div class="lang-fill" data-width="${pctAR}"></div></div>
+        </div>
+        <div class="lang-item lang-en">
+          <div class="lang-header">
+            <span class="lang-name">🇬🇧 Anglais</span>
+            <span class="lang-count">${s.lang_en || 0} msg · ${pctEN}%</span>
+          </div>
+          <div class="lang-bar"><div class="lang-fill" data-width="${pctEN}"></div></div>
+        </div>
+      </div>
+
+      <!-- Feedback -->
+      <div class="card" style="animation-delay:0.5s">
+        <div class="card-title">💬 Satisfaction utilisateurs</div>
+        <div class="feedback-row">
+          <div class="feedback-box pos">
+            <div class="feedback-icon">👍</div>
+            <div class="feedback-val">${s.feedback_pos || 0}</div>
+            <div class="feedback-label">Utile</div>
+          </div>
+          <div class="feedback-box neg">
+            <div class="feedback-icon">👎</div>
+            <div class="feedback-val">${s.feedback_neg || 0}</div>
+            <div class="feedback-label">Pas utile</div>
+          </div>
+        </div>
+        <div style="background:var(--surface2);border-radius:8px;padding:12px;text-align:center;margin-top:8px;">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Taux de satisfaction</div>
+          <div style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:${satisfactionRate >= 70 ? 'var(--green)' : 'var(--red)'}">${satisfactionRate}%</div>
+        </div>
+      </div>
+
+      <!-- Activité -->
+      <div class="card chart-wrap" style="animation-delay:0.6s">
+        <div class="card-title">📈 Activité — 7 derniers jours</div>
+        <div class="activity-chart">${barsHTML}</div>
+      </div>
+
+      <!-- Top questions -->
+      <div class="card" style="animation-delay:0.7s">
+        <div class="card-title">🔥 Questions les plus posées</div>
+        ${topQHTML}
+      </div>
+
+      <!-- Recent log -->
+      <div class="card full-width" style="animation-delay:0.8s">
+        <div class="card-title">🕐 Historique récent</div>
+        <div style="overflow-x:auto">
+          <table class="log-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Langue</th>
+                <th>Question</th>
+                <th>Intent</th>
+              </tr>
+            </thead>
+            <tbody>${recentHTML}</tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="last-update">Dernière mise à jour : ${new Date().toLocaleString('fr-FR')}</div>
+  `;
+
+  // Animate bars
+  setTimeout(() => {
+    document.querySelectorAll('.lang-fill').forEach(el => {
+      el.style.width = el.dataset.width + '%';
+    });
+  }, 100);
+}
+
+// Load on startup
+loadStats();
+</script>
+</body>
+</html>
