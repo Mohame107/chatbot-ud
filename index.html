@@ -596,7 +596,7 @@
     let chipsHtml = '';
     if (role === 'bot' && chips && chips.length) {
       chipsHtml = `<div class="cm-chips">${chips.map(c =>
-        `<button class="cm-chip" onclick="sendQuick('${c}')">${c}</button>`
+        `<button class="cm-chip" data-msg="${c.replace(/"/g, '&quot;')}" onclick="sendQuick(this.dataset.msg)">${c}</button>`
       ).join('')}</div>`;
     }
 
