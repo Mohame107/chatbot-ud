@@ -482,7 +482,7 @@
         <span>🎤</span>
       </button>
       <input type="text" class="cw-input" id="cwInput"
-        id="cwPlaceholder" placeholder="Posez votre question..."
+        placeholder="Posez votre question..."
         onkeydown="if(event.key==='Enter') sendMessage()"/>
       <button class="cw-send" onclick="sendMessage()">
         <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
@@ -643,7 +643,12 @@
   }
 
   function initChat() {
-    addMsg('bot', welcomeMsgs[lang] || welcomeMsgs['fr'], ["Comment s'inscrire ?", "Filières disponibles ?", "Dates importantes ?"]);
+    const welcomeChips = {
+      fr: ["Comment s'inscrire ?", "Filières disponibles ?", "Dates importantes ?"],
+      ar: ["كيف أسجل؟", "ما هي التخصصات؟", "التواريخ المهمة؟"],
+      en: ["How to register?", "Available programs?", "Important dates?"]
+    };
+    addMsg('bot', welcomeMsgs[lang] || welcomeMsgs['fr'], welcomeChips[lang] || welcomeChips['fr']);
   }
 
   // ── ENVOI ─────────────────────────────────────────────
@@ -792,7 +797,6 @@
     }
   }
 
-  // Traductions des boutons et placeholder
   const QUICK_LABELS = {
     fr: {
       inscription: "Comment s'inscrire ?",
