@@ -472,17 +472,17 @@
   <!-- Saisie -->
   <div class="cw-input-area">
     <div class="cw-quick">
-      <button class="cw-qbtn" onclick="sendQuick('Comment s\'inscrire ?')">🎓 Inscription</button>
-      <button class="cw-qbtn" onclick="sendQuick('Documents requis ?')">📄 Documents</button>
-      <button class="cw-qbtn" onclick="sendQuick('Quelles filières ?')">📚 Filières</button>
-      <button class="cw-qbtn" onclick="sendQuick('Frais d\'inscription ?')">💰 Frais</button>
+      <button class="cw-qbtn" onclick="sendQuick(QUICK_LABELS[lang].inscription)">🎓 <span id="qlbl-inscription">Inscription</span></button>
+      <button class="cw-qbtn" onclick="sendQuick(QUICK_LABELS[lang].documents)">📄 <span id="qlbl-documents">Documents</span></button>
+      <button class="cw-qbtn" onclick="sendQuick(QUICK_LABELS[lang].filieres)">📚 <span id="qlbl-filieres">Filières</span></button>
+      <button class="cw-qbtn" onclick="sendQuick(QUICK_LABELS[lang].frais)">💰 <span id="qlbl-frais">Frais</span></button>
     </div>
     <div class="cw-row">
       <button class="cw-mic" id="micBtn" onclick="toggleVoice()" title="Message vocal">
         <span>🎤</span>
       </button>
       <input type="text" class="cw-input" id="cwInput"
-        placeholder="Posez votre question..."
+        id="cwPlaceholder" placeholder="Posez votre question..."
         onkeydown="if(event.key==='Enter') sendMessage()"/>
       <button class="cw-send" onclick="sendMessage()">
         <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
@@ -792,6 +792,45 @@
     }
   }
 
+  // Traductions des boutons rapides et placeholder
+  const QUICK_LABELS = {
+    fr: {
+      inscription: "Comment s'inscrire ?",
+      documents:   "Documents requis ?",
+      filieres:    "Quelles filières ?",
+      frais:       "Frais d'inscription ?",
+      placeholder: "Posez votre question...",
+      labels:      ["Inscription", "Documents", "Filières", "Frais"]
+    },
+    ar: {
+      inscription: "كيف أسجل؟",
+      documents:   "الوثائق المطلوبة؟",
+      filieres:    "ما هي التخصصات؟",
+      frais:       "رسوم التسجيل؟",
+      placeholder: "اكتب سؤالك هنا...",
+      labels:      ["التسجيل", "الوثائق", "التخصصات", "الرسوم"]
+    },
+    en: {
+      inscription: "How to register?",
+      documents:   "Required documents?",
+      filieres:    "Available programs?",
+      frais:       "Registration fees?",
+      placeholder: "Ask your question...",
+      labels:      ["Enroll", "Documents", "Programs", "Fees"]
+    }
+  };
+
+  function updateQuickButtons() {
+    const q = QUICK_LABELS[lang] || QUICK_LABELS['fr'];
+    document.getElementById('qlbl-inscription').textContent = q.labels[0];
+    document.getElementById('qlbl-documents').textContent   = q.labels[1];
+    document.getElementById('qlbl-filieres').textContent    = q.labels[2];
+    document.getElementById('qlbl-frais').textContent       = q.labels[3];
+    document.getElementById('cwInput').placeholder          = q.placeholder;
+    // RTL pour l'arabe
+    document.getElementById('cwInput').style.direction = lang === 'ar' ? 'rtl' : 'ltr';
+  }
+
   // Réinitialise la session quand on change de langue
   function setLang(l, btn) {
     lang = l;
@@ -800,6 +839,7 @@
     document.querySelectorAll('.cw-lang').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     document.getElementById('cwMessages').innerHTML = '';
+    updateQuickButtons();
     initChat();
   }
 </script>
