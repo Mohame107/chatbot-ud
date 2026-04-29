@@ -114,7 +114,7 @@ Rasa Server :5005  ──────►  Rasa Actions :5055
 
 ```powershell
 # 1. Cloner le projet
-git clone https://github.com/TON_USERNAME/chatbot-ud.git
+git clone https://github.com/Mohame107/chatbot-ud.git
 cd chatbot-ud
 
 # 2. Créer l'environnement virtuel
@@ -129,7 +129,7 @@ pip install packaging==20.9 pydantic==1.10.9
 
 # 4. Configurer la clé Groq
 # Ouvrir backend/actions/actions.py
-# Remplacer GROQ_API_KEY = "VOTRE_CLE_ICI"
+# Remplacer GROQ_API_KEY = "Cle_grog"
 
 # 5. Entraîner le modèle
 rasa train
