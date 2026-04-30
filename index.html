@@ -666,9 +666,20 @@
   }
 
   function fb(btn, id, type) {
+    // Changement visuel
     document.getElementById(id+'-up').classList.remove('liked');
     document.getElementById(id+'-dn').classList.remove('disliked');
-    btn.classList.add(type==='up'?'liked':'disliked');
+    btn.classList.add(type==='up' ? 'liked' : 'disliked');
+    // Désactiver après clic (éviter double vote)
+    document.getElementById(id+'-up').disabled = true;
+    document.getElementById(id+'-dn').disabled = true;
+    // Envoyer le feedback à Rasa
+    const payload = type === 'up' ? '/feedback_positif' : '/feedback_negatif';
+    fetch(`${RASA_URL}/webhooks/rest/webhook`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sender: sessionId, message: payload })
+    }).catch(err => console.warn('Feedback non envoyé:', err));
   }
 
   function showTyping() {
