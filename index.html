@@ -568,6 +568,49 @@
     }
   };
 
+  // ── Chips de suggestion par langue
+  const SUGGESTION_CHIPS = {
+    fr: {
+      afterInscri:  ["Documents requis ?", "Frais d'inscription ?", "Filières disponibles ?"],
+      afterDoc:     ["Comment s'inscrire ?", "Frais d'inscription ?", "Dates importantes ?"],
+      afterFrais:   ["Documents requis ?", "Comment s'inscrire ?", "Filières disponibles ?"],
+      afterFiliere: ["Comment s'inscrire ?", "Documents requis ?", "Frais d'inscription ?"],
+      afterDate:    ["Comment s'inscrire ?", "Documents requis ?", "Frais d'inscription ?"],
+      afterContact: ["Comment s'inscrire ?", "Documents requis ?", "Filières disponibles ?"],
+      default:      ["Comment s'inscrire ?", "Documents requis ?", "Frais d'inscription ?"]
+    },
+    ar: {
+      afterInscri:  ["الوثائق المطلوبة؟", "رسوم التسجيل؟", "ما هي التخصصات؟"],
+      afterDoc:     ["كيف أسجل؟", "رسوم التسجيل؟", "التواريخ المهمة؟"],
+      afterFrais:   ["الوثائق المطلوبة؟", "كيف أسجل؟", "ما هي التخصصات؟"],
+      afterFiliere: ["كيف أسجل؟", "الوثائق المطلوبة؟", "رسوم التسجيل؟"],
+      afterDate:    ["كيف أسجل؟", "الوثائق المطلوبة؟", "رسوم التسجيل؟"],
+      afterContact: ["كيف أسجل؟", "الوثائق المطلوبة؟", "ما هي التخصصات؟"],
+      default:      ["كيف أسجل؟", "الوثائق المطلوبة؟", "رسوم التسجيل؟"]
+    },
+    en: {
+      afterInscri:  ["Required documents?", "Registration fees?", "Available programs?"],
+      afterDoc:     ["How to register?", "Registration fees?", "Important dates?"],
+      afterFrais:   ["Required documents?", "How to register?", "Available programs?"],
+      afterFiliere: ["How to register?", "Required documents?", "Registration fees?"],
+      afterDate:    ["How to register?", "Required documents?", "Registration fees?"],
+      afterContact: ["How to register?", "Required documents?", "Available programs?"],
+      default:      ["How to register?", "Required documents?", "Registration fees?"]
+    }
+  };
+
+  function getChips(questionOrResponse) {
+    const L = SUGGESTION_CHIPS[lang] || SUGGESTION_CHIPS['fr'];
+    const t = (questionOrResponse || '').toLowerCase();
+    if (t.includes('frais') || t.includes('رسوم') || t.includes('fee') || t.includes('price') || t.includes('cost') || t.includes('montant') || t.includes('combien')) return L.afterFrais;
+    if (t.includes('doc') || t.includes('وثائق') || t.includes('pièce') || t.includes('dossier') || t.includes('required') || t.includes('document')) return L.afterDoc;
+    if (t.includes('fili') || t.includes('تخصص') || t.includes('facult') || t.includes('program') || t.includes('formation')) return L.afterFiliere;
+    if (t.includes('date') || t.includes('تاريخ') || t.includes('quand') || t.includes('juillet') || t.includes('when') || t.includes('deadline')) return L.afterDate;
+    if (t.includes('contact') || t.includes('تواصل') || t.includes('téléphone') || t.includes('email') || t.includes('phone')) return L.afterContact;
+    if (t.includes('inscri') || t.includes('تسجيل') || t.includes('comment') || t.includes('register') || t.includes('enroll')) return L.afterInscri;
+    return L.default;
+  }
+
   function getFallback(text) {
     const t = text.toLowerCase();
     // ✅ Frais vérifié EN PREMIER avant inscription
@@ -686,10 +729,11 @@
         // Afficher tous les textes fusionnés en une seule bulle
         if (textMsgs.length > 0) {
           const merged = textMsgs.map(m => m.text).join("\n\n");
-          addMsg('bot', merged, getFallback(text).chips);
+          // Chips multilingues basées sur la question posée
+          addMsg('bot', merged, getChips(text));
         }
-        // Afficher les messages avec boutons séparément
-        btnMsgs.forEach(m => addMsg('bot', m.text, null));
+        // Afficher les messages avec boutons (feedback) + chips de navigation
+        btnMsgs.forEach(m => addMsg('bot', m.text, getChips(text)));
 
       } else {
         const { text: reply, chips } = getFallback(text);
