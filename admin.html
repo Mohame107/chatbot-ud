@@ -488,7 +488,7 @@
         <div class="status-dot"></div>
         HF Spaces actif
       </div>
-      <button class="refresh-btn" onclick="loadStats()">
+      <button class="refresh-btn" id="refreshBtn" onclick="refreshWithAnimation()">
         ↻ Rafraîchir
       </button>
     </div>
@@ -507,18 +507,31 @@
 <script>
 const HF_URL = "https://yazid16-chatbot-inscription-ud.hf.space/webhooks/rest/webhook";
 
+function refreshWithAnimation() {
+  const btn = document.getElementById('refreshBtn');
+  btn.style.transform = 'rotate(360deg)';
+  btn.style.transition = 'transform 0.5s ease';
+  setTimeout(() => {
+    btn.style.transform = '';
+    btn.style.transition = '';
+  }, 500);
+  loadStats();
+}
+
 async function loadStats() {
   document.getElementById('content').innerHTML = `
     <div class="loading">
       <div class="spinner"></div>
-      <p style="color:var(--muted);font-size:12px;">Chargement des statistiques...</p>
+      <p style="color:var(--muted);font-size:12px;">Chargement des statistiques en temps réel...</p>
     </div>`;
 
   try {
+    // Cache-busting : sender unique à chaque appel pour éviter les réponses cachées
+    const uniqueSender = "admin_" + Date.now() + "_" + Math.random().toString(36).substr(2, 6);
     const res = await fetch(HF_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sender: "admin_panel_" + Date.now(), message: "ADMIN_GET_STATS" })
+      headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-cache' },
+      body: JSON.stringify({ sender: uniqueSender, message: "ADMIN_GET_STATS" })
     });
 
     const data = await res.json();
@@ -703,7 +716,10 @@ function renderDashboard(s) {
 
     </div>
 
-    <div class="last-update">Dernière mise à jour : ${new Date().toLocaleString('fr-FR')}</div>
+    <div class="last-update">
+    ⚡ Données en temps réel — Dernière mise à jour : ${new Date().toLocaleString('fr-FR')}
+    &nbsp;|&nbsp; ⚠️ Les données sont réinitialisées au redémarrage du serveur HF Spaces (toutes les 48h)
+  </div>
   `;
 
   // Animate bars
