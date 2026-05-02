@@ -685,14 +685,14 @@
     fetch(`${RASA_URL}/webhooks/rest/webhook`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sender: sessionId, message: payload })
+      body: JSON.stringify({ sender: sessionId + '_lang_' + lang, message: payload })
     }).catch(err => console.warn('Feedback non envoyé:', err));
   }
 
   const TYPING_LABELS = {
-    fr: ["Je recherche l'information...", "Analyse de votre question...", "Préparation de la réponse..."],
-    ar: ["أبحث عن المعلومة...", "تحليل سؤالك...", "جاري تحضير الإجابة..."],
-    en: ["Searching for information...", "Analyzing your question...", "Preparing your answer..."]
+    fr: ["Je recherche l'information...", "Analyse de votre question...", "Consultation de la base de données..."],
+    ar: ["أبحث عن المعلومة...", "تحليل سؤالك...", "استشارة قاعدة البيانات..."],
+    en: ["Searching for information...", "Analyzing your question...", "Consulting the database..."]
   };
 
   function showTyping() {
@@ -742,7 +742,7 @@
             'ngrok-skip-browser-warning': 'true'
           },
           // Fix 1 — utilise sessionId fixe pour garder le contexte
-          body: JSON.stringify({ sender: sessionId, message: text })
+          body: JSON.stringify({ sender: sessionId + '_lang_' + lang, message: text })
         }),
         new Promise((_,r) => setTimeout(() => r(new Error('timeout')), 5000))
       ]);
@@ -916,6 +916,7 @@
   function setLang(l, btn) {
     lang = l;
     sessionId = 'ud-widget-' + Date.now();
+    // sessionId change → Rasa crée une nouvelle session avec la bonne langue
     document.querySelectorAll('.cw-lang').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     document.getElementById('cwMessages').innerHTML = '';
